@@ -1,0 +1,86 @@
+<style>
+  canvas {
+    border: 1px solid black;
+  }
+</style>
+
+<body>
+  <canvas width="800" height="600"></canvas>
+</body>
+
+<script>
+  function cloneEvent(e) {
+    const exclude = [
+      "path",
+      "view",
+      "target",
+      "srcElement",
+      "currentTarget",
+      "sourceCapabilities",
+      "toElement",
+    ];
+    if (e === undefined || e === null) return undefined;
+    const clone = {};
+    for (const p in e) {
+      if (exclude.find((el) => el === p)) {
+        continue;
+      }
+      if (typeof e[p] === "function") {
+        continue;
+      }
+      clone[p] = e[p];
+    }
+
+    return clone;
+  }
+  var pixiWorker = new Worker("worker.js");
+
+  const eventListeners = {
+    keydown: (e) => {
+      pixiWorker.postMessage({
+        type: "event",
+        event: { type: "keydown", data: cloneEvent(e) },
+        messageType: "notify",
+        eventId: -1,
+      });
+    },
+    mousemove: (e) => {
+      pixiWorker.postMessage({
+        type: "event",
+        event: { type: "mousemove", data: cloneEvent(e) },
+        messageType: "notify",
+        eventId: -1,
+      });
+    },
+    mousedown: (e) => {
+      pixiWorker.postMessage({
+        type: "event",
+        event: { type: "mousedown", data: cloneEvent(e) },
+        messageType: "notify",
+        eventId: -1,
+      });
+    },
+    mouseup: (e) => {
+      pixiWorker.postMessage({
+        type: "event",
+        event: { type: "mouseup", data: cloneEvent(e) },
+        messageType: "notify",
+        eventId: -1,
+      });
+    },
+  };
+
+  const offscreen = document.querySelector("canvas").transferControlToOffscreen();
+  document.body.addEventListener("keydown", eventListeners.keydown, false);
+  document.body.addEventListener("mousemove", eventListeners.mousemove, true);
+  document.body.addEventListener("mousedown", eventListeners.mousedown, true);
+  document.body.addEventListener("mouseup", eventListeners.mouseup, true);
+
+  pixiWorker.postMessage({
+    type: "start",
+    hostname: window.location.hostname,
+    width: 500,
+    height: 500,
+    canvas: offscreen,
+  }, [offscreen]);
+</script>
