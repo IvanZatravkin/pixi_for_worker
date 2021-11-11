@@ -1,4 +1,4 @@
-To make PIXI work in web worker you need to things:
+To make PIXI work in web worker you need two things:
 - pass events from main thread to web worker (you can see this in index.html)
 - pass these events to pixi event listeners (you can see this in worker.js)
 
